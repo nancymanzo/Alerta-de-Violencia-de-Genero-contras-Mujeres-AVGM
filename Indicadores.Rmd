@@ -1,13 +1,13 @@
 ---
-title: "INDICADORES DE LA ALERTA DE VIOLENCIA DE GÉNERO CONTRA LAS MUJERES DEL ESTADO DE JALISCO"
-author: "2020 a 2021"
+title: "INDICADORES DE LA ALERTA DE VIOLENCIA DE GÉNERO CONTRA LAS MUJERES DEL ESTADO DE JALISCO 2020-2021"
+author: "Indicadores de Fiscalía y FEPD."
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
     theme: hpstr
     highlight: github
 ---
-### Informacion mensual del año 2021 a agosto para el cálculo de la línea base del indicador.
+
 
 ```{r, , include=F, warning=F, echo=F}
 
@@ -18,6 +18,7 @@ library(DT)
 library(scales)
 library(ggplot2)
 library(plotly)
+library(tidyverse)
 ```
 
 ```{r, include=FALSE}
@@ -38,7 +39,6 @@ indicador_28 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 28")
 indicador_30 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 30")
 indicador_31 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 31", range = "A1:G434")
 
-
 indicador_32 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 32")
 indicador_33 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 33")
 indicador_34 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 34")
@@ -48,6 +48,7 @@ indicador_37 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 37")
 indicador_38 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 38")
 indicador_39 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 39")
 indicador_40 <- read_excel("indicadores_181021.xlsx", sheet = "Ind 40")
+
 ```
 
 ```{r, include=FALSE}
@@ -66,53 +67,55 @@ indicador_6 %>%
             `MEDIDAS DE PROTECCIÓN`=sum(`TOTAL DE MUJERES CANALIZADAS PARA OTORGAMIENTO DE MEDIDAS DE PROTECCIÓN`),
             `LÍNEA BASE`=scales::percent(sum((`ORDENES DE PROTECCIÓN`+`MEDIDAS DE PROTECCIÓN`)/`MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`), 0.1)) -> tabla_6
 
+tabla_6 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO",
+                      "ORDENES DE PROTECCIÓN",
+                      "MEDIDAS DE PROTECCIÓN"))-> t6
 
-  # ggplot(tabla_6) +
-  # aes(x = MES, y = `ORDENES DE PROTECCIÓN`, group=1) +
-  # geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  #   geom_point(aes(x = MES, y = `ORDENES DE PROTECCIÓN`, group=1), fill="#D98CBC", colour="#D98CBC")+
-  #   geom_line(aes(y=`MEDIDAS DE PROTECCIÓN`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-  #   geom_point(aes(y=`MEDIDAS DE PROTECCIÓN`, group=1), colour="#C91682", fill="#C91682")+
-  #   geom_line(aes(y=`MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-  #   geom_point(aes(y=`MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`, group=1), colour="#7E3794", fill="#7E3794")+
-  #   xlab("") + ylab("")+ 
-  #   scale_y_continuous(labels = scales::comma) +
-  # theme_minimal() -> gr6
-
-
-ggplot(tabla_6) +
-  aes(x = MES, y = `ORDENES DE PROTECCIÓN`, group=3) +
-  geom_line() + geom_point()+
-    geom_point(aes(x = MES, y = `ORDENES DE PROTECCIÓN`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    geom_line(aes(y=`MEDIDAS DE PROTECCIÓN`, group=1), colour="#C91682", fill="#C91682", size=1)+
-    geom_point(aes(y=`MEDIDAS DE PROTECCIÓN`, group=1), colour="#C91682", fill="#C91682")+
-    geom_line(aes(y=`MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`, group=1), colour="#7E3794", fill="#7E3794", size=1)+
-    geom_point(aes(y=`MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`, group=1), colour="#7E3794", fill="#7E3794")+
-  scale_fill_hue(direction = 1) +
-  theme_minimal() +
-  xlab("") + ylab("")+ 
+t6 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 6",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
   scale_y_continuous(labels = scales::comma) +
-  facet_wrap(vars(AÑO))-> gr6
+  scale_color_manual(
+        values = c(
+          `MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO` = "#D98CBC",
+          `ORDENES DE PROTECCIÓN` = "#C91682",
+          `MEDIDAS DE PROTECCIÓN` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))-> gr6
 
 
 ```
 
-# Indicador 6
+### Indicador 6
 
-### Porcentaje de mujeres víctimas de violencia por razones de género atendidas y canalizadas para otorgamiento de orden de protección y/o medidas de protección.
+#### Porcentaje de mujeres víctimas de violencia por razones de género atendidas y canalizadas para otorgamiento de orden de protección y/o medidas de protección.
 
 
 ```{r, include=T, echo=F}
-tabla_6 %>% datatable(filter="top", options = list(pageLength = 16))
+tabla_6 %>% datatable(filter="top", options = list(pageLength = 6))
 
-ggplotly(gr6)
+ggplotly(gr6) %>% 
+    layout(title = "Indicador 6",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
+
+  
 ```
 
-# Indicador 7
+### Indicador 7
 
-### Porcentaje de mujeres víctimas de violencia por razones de género que solicitaron y obtuvieron orden y/o medida de protección.
+#### Porcentaje de mujeres víctimas de violencia por razones de género que solicitaron y obtuvieron orden y/o medida de protección.
 
-##### En Mezquitic y Tuxpan hay valor con NA en 2019. Revisar.
+###### En Mezquitic y Tuxpan hay valor con NA en 2019. Revisar.
 ```{r, include=FALSE, echo=F}
 indicador_7 %>%
   mutate(MES=factor(MES,
@@ -127,32 +130,48 @@ indicador_7 %>%
             `LÍNEA BASE`=scales::percent(sum(`TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA MEDIDA DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL`/`MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`), 0.1)) -> tabla_7
 
 
+tabla_7 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO",
+                      "TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA MEDIDA DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL",
+                      "TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA ORDEN DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL"))-> t7
 
-ggplot(tabla_7) +
-  aes(x = MES,y = `MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO`, colour = MES, group=3) +
-  geom_line(colour="#D98CBC", fill="#D98CBC") + geom_point(colour="#D98CBC", fill="#D98CBC")+
-geom_line(aes(y=`TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA MEDIDA DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA MEDIDA DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA ORDEN DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA ORDEN DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL`, group=1), colour="#7E3794", fill="#7E3794")+
-  xlab("") + ylab("")+ 
-  scale_y_continuous(labels = scales::comma) + theme_minimal()+
-  facet_wrap(vars(AÑO))   -> gr7
+t7 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 6",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO` = "#D98CBC",
+          `TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA MEDIDA DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL` = "#C91682",
+          `TOTAL DE MUJERES VÍCTIMAS DE VIOLENCIA DE GÉNERO QUE SOLICITARON UNA ORDEN DE PROTECCIÓN SIN TENER UNA CANALIZACIÓN FORMAL` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr7
   
   
 ```
 
 ```{r, include=T, echo=F}
-tabla_7 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr7)
+tabla_7 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr7)%>% 
+    layout(title = "Indicador 7",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 
 ```
 
-# Indicador 9
+## Indicador 9
 
-### Porcentaje de medidas de protección otorgadas que fueron trabajadas y/o notificadas efectiva y personalmente a la persona agresora en relación al total.
+#### Porcentaje de medidas de protección otorgadas que fueron trabajadas y/o notificadas efectiva y personalmente a la persona agresora en relación al total.
 
 ```{r , include=FALSE, echo=F}
 indicador_9 %>%
@@ -172,31 +191,46 @@ indicador_9 %>%
 
 
 
-ggplot(tabla_9) +
-  aes(x = MES, y = `TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    
-    geom_line(aes(y=`MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES QUE FUERON TRABAJADAS`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES QUE FUERON TRABAJADAS`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr9
+tabla_9 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES",
+                      "MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES QUE FUERON TRABAJADAS", 
+                      "MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA"))-> t9
+
+t9 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 9",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES` = "#D98CBC",
+          `MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO VIGENTES QUE FUERON TRABAJADAS` = "#C91682",
+          `MEDIDAS DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr9
 ```
 
 ```{r, include=T, echo=F}
-tabla_9 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr9)
+tabla_9 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr9)%>% 
+    layout(title = "Indicador 9",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 10
+## Indicador 10
 
-### Porcentaje de órdenes de protección otorgadas que fueron trabajadas y/o notificadas efectiva y personalmente a la persona agresora en relación al total.
+#### Porcentaje de órdenes de protección otorgadas que fueron trabajadas y/o notificadas efectiva y personalmente a la persona agresora en relación al total.
 
-```{r , include=FALSE, echo=F}
+```{r , include=FALSE, echo=F, align="center"}
 indicador_10 %>%
   mutate(MES=factor(MES,
                     levels=c("Enero", "Febrero", "Marzo","Abril", "Mayo", "Junio","Julio", "Agosto",
@@ -212,33 +246,49 @@ indicador_10 %>%
             
             `LÍNEA BASE`=scales::percent(sum(`ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON TRABAJADAS`+ `ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA`)/`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO`, 0.1)) -> tabla_10
 
-ggplot(tabla_10) +
-  aes(x = MES, y = `TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    
-    geom_line(aes(y=`ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON TRABAJADAS`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON TRABAJADAS`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr10
+tabla_10 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO",
+                      "ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON TRABAJADAS",
+                      "ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA"))-> t10
+
+t10 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 10",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO` = "#D98CBC",
+          `ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON TRABAJADAS` = "#C91682",
+          `ÓRDENES DE PROTECCIÓN EMITIDAS POR VIOLENCIA POR RAZÓN DE GÉNERO QUE FUERON NOTIFICADAS EFECTIVA Y PERSONALMENTE A LA PERSONA AGRESORA` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr10
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_10 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr10)
+tabla_10 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr10)%>% 
+    layout(title = "Indicador 10",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 11
+## Indicador 11
 
-### Porcentaje de mujeres que han recibido seguimiento después de otorgada su orden y/o medida de protección en relación al total.
+#### Porcentaje de mujeres que han recibido seguimiento después de otorgada su orden y/o medida de protección en relación al total.
 
 ```{r , include=FALSE, echo=F}
+
 indicador_11 %>%
   mutate(MES=factor(MES,
                     levels=c("Enero", "Febrero", "Marzo","Abril", "Mayo", "Junio","Julio", "Agosto",
@@ -257,36 +307,49 @@ indicador_11 %>%
             `LÍNEA BASE`=scales::percent(sum((`MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO`+ `MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO`)/(`TOTAL DE MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES` +`TOTAL DE MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES`)), 0.1)) -> tabla_11
 
 
-ggplot(tabla_11) +
-  aes(x = MES, y = `TOTAL DE MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES`, group=1), fill="#D98CBC", colour="#D98CBC")+
+tabla_11 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO",
+                      "MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO",
+                      "TOTAL DE MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES",
+                      "TOTAL DE MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES"))-> t11
 
-    geom_line(aes(y=`TOTAL DE MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES`, group=1), colour="#B58CD9", fill="#B58CD9", size=1)+ 
-    geom_point(aes(y=`TOTAL DE MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES`, group=1), colour="#B58CD9", fill="#B58CD9")+
-
-      
-    geom_line(aes(y=`MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr11
+t11 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 11",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO` = "#B58CD9",
+          `MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES QUE HAN RECIBIDO SEGUIMIENTO` = "#D98CBC",
+          `TOTAL DE MUJERES CON MEDIDAS DE PROTECCIÓN VIGENTES` = "#7E3794",
+          `TOTAL DE MUJERES CON ÓRDENES DE PROTECCIÓN VIGENTES` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr11
 
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_11 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr11)
+tabla_11 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr11)%>% 
+    layout(title = "Indicador 11",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 12
+## Indicador 12
 
-### Porcentaje de Carpetas de Investigación iniciadas contra personas agresoras derivados de incumplimiento de órdenes y/o medidas de protección.
+#### Porcentaje de Carpetas de Investigación iniciadas contra personas agresoras derivados de incumplimiento de órdenes y/o medidas de protección.
 
 ```{r , include=FALSE, echo=F}
 indicador_12 %>%
@@ -308,35 +371,48 @@ indicador_12 %>%
             `LÍNEA BASE`=scales::percent(sum((`TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE MEDIDAS DE PROTECCIÓN`+ `TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE ÓRDENES DE PROTECCIÓN`)/(`TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES` +`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES`)), 0.1)) -> tabla_12
 
 
-ggplot(tabla_12) +
-  aes(x = MES, y = `TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES`, group=1), fill="#D98CBC", colour="#D98CBC")+
 
-    geom_line(aes(y=`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES`, group=1), colour="#B58CD9", fill="#B58CD9", size=1)+ 
-    geom_point(aes(y=`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES`, group=1), colour="#B58CD9", fill="#B58CD9")+
+tabla_12 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES",
+                      "TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE MEDIDAS DE PROTECCIÓN",
+                      "TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES",
+                      "TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE ÓRDENES DE PROTECCIÓN"))-> t12
 
-      
-    geom_line(aes(y=`TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE MEDIDAS DE PROTECCIÓN`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE MEDIDAS DE PROTECCIÓN`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE ÓRDENES DE PROTECCIÓN`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE ÓRDENES DE PROTECCIÓN`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr12
-
+t12 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 12",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE ÓRDENES DE PROTECCIÓN` = "#B58CD9",
+          `TOTAL DE CARPETAS DE INVESTIGACIÓN INICIADAS CONTRA PERSONAS AGRESORAS DERIVADOS DEL INCUMPLIMIENTO DE MEDIDAS DE PROTECCIÓN` = "#D98CBC",
+          `TOTAL DE MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES` = "#7E3794",
+          `TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 40, vjust = 0.5, hjust=1)) -> gr12
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_12 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr12)
+tabla_12 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr12)%>% 
+    layout(title = "Indicador 12",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 13
+## Indicador 13
 
-### Porcentaje de casos en los que la orden y/o medida de protección resultó ser adecuada y efectiva para la víctima en relación al total.
+#### Porcentaje de casos en los que la orden y/o medida de protección resultó ser adecuada y efectiva para la víctima en relación al total.
 
 ```{r , include=FALSE, echo=F}
 
@@ -358,36 +434,48 @@ indicador_13 %>%
             
             `LÍNEA BASE`=scales::percent(sum((`CASOS EN LOS QUE LA MEDIDA DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)`+ `CASOS EN LOS QUE LA ORDEN DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)`)/(`TOTAL MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES` +`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES`)), 0.1)) -> tabla_13
 
-ggplot(tabla_13) +
-  aes(x = MES, y = `TOTAL MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES`, group=1), fill="#D98CBC", colour="#D98CBC")+
 
-    geom_line(aes(y=`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES`, group=1), colour="#B58CD9", fill="#B58CD9", size=1)+ 
-    geom_point(aes(y=`TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES`, group=1), colour="#B58CD9", fill="#B58CD9")+
+tabla_13 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES",
+                      "CASOS EN LOS QUE LA MEDIDA DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)",
+                      "TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES",
+                      "CASOS EN LOS QUE LA ORDEN DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)"))-> t13
 
-      
-    geom_line(aes(y=`CASOS EN LOS QUE LA ORDEN DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`CASOS EN LOS QUE LA ORDEN DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`CASOS EN LOS QUE LA MEDIDA DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`CASOS EN LOS QUE LA MEDIDA DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr13
-
+t13 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 13",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `CASOS EN LOS QUE LA MEDIDA DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)` = "#B58CD9",
+          `CASOS EN LOS QUE LA ORDEN DE PROTECCIÓN NO RESULTÓ SER ADECUADA Y EFECTIVA PARA LA VÍCTIMA (Casos de reincidencia)` = "#D98CBC",
+          `TOTAL DE ÓRDENES DE PROTECCIÓN EMITIDAS VIGENTES` = "#7E3794",
+          `TOTAL MEDIDAS DE PROTECCIÓN EMITIDAS VIGENTES` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 40, vjust = 0.5, hjust=1)) -> gr13
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_13 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr13)
+tabla_13 %>% datatable(filter="top", options = list(pageLength = 6))
+ggplotly(gr13)%>% 
+    layout(title = "Indicador 13",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 16
+## Indicador 16
 
-### Porcentaje de mujeres denunciantes de violación o abuso sexual infantil que son remitidas para atención integral de la salud conforme a la NOM 046 en relación al total.
+#### Porcentaje de mujeres denunciantes de violación o abuso sexual infantil que son remitidas para atención integral de la salud conforme a la NOM 046 en relación al total.
 
 ```{r , include=FALSE, echo=F}
 indicador_16 %>%
@@ -408,37 +496,50 @@ indicador_16 %>%
             
             `LÍNEA BASE`=scales::percent(sum((`TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR ABUSO SEXUAL INFANTIL`+ `TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR VIOLACIÓN`)/(`TOTAL DE MUJERES QUE DENUNCIAN ABUSO SEXUAL INFANTIL` +`TOTAL DE MUJERES QUE DENUNCIAN VIOLACIÓN`)), 0.1)) -> tabla_16
 
-ggplot(tabla_16) +
-  aes(x = MES, y = `TOTAL DE MUJERES QUE DENUNCIAN ABUSO SEXUAL INFANTIL`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE MUJERES QUE DENUNCIAN ABUSO SEXUAL INFANTIL`, group=1), fill="#D98CBC", colour="#D98CBC")+
+tabla_16 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE MUJERES QUE DENUNCIAN ABUSO SEXUAL INFANTIL",
+                      "TOTAL DE MUJERES QUE DENUNCIAN VIOLACIÓN",
+                      "TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR ABUSO SEXUAL INFANTIL",
+                      "TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR VIOLACIÓN"))-> t16
 
-    geom_line(aes(y=`TOTAL DE MUJERES QUE DENUNCIAN VIOLACIÓN`, group=1), colour="#B58CD9", fill="#B58CD9", size=1)+ 
-    geom_point(aes(y=`TOTAL DE MUJERES QUE DENUNCIAN VIOLACIÓN`, group=1), colour="#B58CD9", fill="#B58CD9")+
-
-      
-    geom_line(aes(y=`TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR ABUSO SEXUAL INFANTIL`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR ABUSO SEXUAL INFANTIL`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR VIOLACIÓN`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR VIOLACIÓN`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr16
+t16 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 13",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR ABUSO SEXUAL INFANTIL` = "#B58CD9",
+          `TOTAL DE MUJERES CANALIZADAS PARA ATENCIÓN INTEGRAL DE LA SALUD (NOM 46) POR VIOLACIÓN` = "#D98CBC",
+          `TOTAL DE MUJERES QUE DENUNCIAN ABUSO SEXUAL INFANTIL` = "#7E3794",
+          `TOTAL DE MUJERES QUE DENUNCIAN VIOLACIÓN` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 40, vjust = 0.5, hjust=1)) -> gr16
 
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_16 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr16)
+tabla_16 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr16)%>% 
+    layout(title = "Indicador 16",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 24
+## Indicador 24
 
-### Porcentaje de municipios que actualizan la información sobre atención a mujeres víctimas de violencia con respecto al total.
-
+#### Porcentaje de municipios que actualizan la información sobre atención a mujeres víctimas de violencia con respecto al total.
+#### Entre 2020 a abril 2021 indicaban 129 instancias responsables, y después sólo dejan a 125
 ```{r , include=FALSE, echo=F}
 indicador_24 %>%
   mutate(MES=factor(MES,
@@ -461,33 +562,51 @@ indicador_24 %>%
             
             `LÍNEA BASE`=scales::percent(sum(ACTUALIZAN/INSTANCIA), 0.1)) -> tabla_24
 
-ggplot(tabla_24) +
-  aes(x = MES, y = ACTUALIZAN, group=1) +
-  geom_line(fill="#D98CBC", colour="#C91682", size=1) + 
-  geom_point(aes(x = MES, y = ACTUALIZAN, group=1), fill="#C91682", colour="#C91682")+
+tabla_24 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("ACTUALIZAN",
+                      "INSTANCIA"))-> t24
 
-    geom_line(aes(y=INSTANCIA, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=INSTANCIA, group=1), colour="#7E3794", fill="#7E3794")+
-
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr24
-
+t24 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 9",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`ACTUALIZAN` = "#C91682",
+          `INSTANCIA` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr24
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_24 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr24)
+datatable(tabla_24, options = list(
+    pageLength = 6,
+    initComplete = JS(
+      "function(settings, json) {",
+      "$(this.api().table().header()).css({'background-color': '#C91682', 'color': 'white'});",
+      "}")))
+  
+ggplotly(gr24)%>% 
+    layout(title = "Indicador 24",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 25
+## Indicador 25
 
-### Porcentaje del personal responsable de la actualización del banco de datos adecuadamente capacitado con relación al total.
+#### Porcentaje del personal responsable de la actualización del banco de datos adecuadamente capacitado con relación al total.
 
-##### Aquí checar los porcentajes totales, verificar.
-##### El primer semestre de 2020 sí nos indican que hay 0 personal capacitado.
+###### Aquí checar los porcentajes totales, verificar.
+###### El primer semestre de 2020 sí nos indican que hay 0 personal capacitado.
 
 ```{r , include=FALSE, echo=F}
 
@@ -504,30 +623,42 @@ indicador_25 %>%
             
             `LÍNEA BASE`=scales::percent(sum(`PERSONAS DEBIDAMENTE CAPACITADAS DE ALIMENTAR BANAVIM`/`PERSONAL RESPONSABLE DE LA ACTUALIZACIÓN DE DATOS`), 0.1)) -> tabla_25
 
+tabla_25 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("PERSONAL RESPONSABLE DE LA ACTUALIZACIÓN DE DATOS",
+                      "PERSONAS DEBIDAMENTE CAPACITADAS DE ALIMENTAR BANAVIM"))-> t25
 
-ggplot(tabla_25) +
-  aes(x = MES, y = `PERSONAS DEBIDAMENTE CAPACITADAS DE ALIMENTAR BANAVIM`, group=1) +
-  geom_line(fill="#D98CBC", colour="#C91682", size=1) + 
-  geom_point(aes(x = MES, y = `PERSONAS DEBIDAMENTE CAPACITADAS DE ALIMENTAR BANAVIM`, group=1), fill="#C91682", colour="#C91682")+
-
-    geom_line(aes(y=`PERSONAL RESPONSABLE DE LA ACTUALIZACIÓN DE DATOS`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`PERSONAL RESPONSABLE DE LA ACTUALIZACIÓN DE DATOS`, group=1), colour="#7E3794", fill="#7E3794")+
-
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr25
-
+t25 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 9",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`PERSONAL RESPONSABLE DE LA ACTUALIZACIÓN DE DATOS` = "#C91682",
+          `PERSONAS DEBIDAMENTE CAPACITADAS DE ALIMENTAR BANAVIM` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr25
 ```
 
 ```{r, include=T, echo=F}
-tabla_25 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr25)
+tabla_25 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr25)%>% 
+    layout(title = "Indicador 25",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 26
+## Indicador 26
 
-### Porcentaje de instancias estatales responsables de alimentar banco de datos que actualizan en tiempo y forma en relación al total de instancias obligadas.
+#### Porcentaje de instancias estatales responsables de alimentar banco de datos que actualizan en tiempo y forma en relación al total de instancias obligadas.
 
 ```{r , include=FALSE, echo=F}
 
@@ -547,33 +678,41 @@ indicador_26 %>%
   summarise(ACTUALIZACIÓN=sum(ACTUALIZACIÓN),
            `LÍNEA BASE`=scales::percent(sum(ACTUALIZACIÓN/7), 0.1)) -> tabla_26
 
-indicador_24 %>% 
-      group_by(MES) %>% 
-  summarise(ACTUALIZAN=sum(ACTUALIZAN),
-            
-            INSTANCIA=sum(INSTANCIA),
-            
-            `LÍNEA BASE`=scales::percent(sum(ACTUALIZAN/INSTANCIA), 0.1)) -> tabla_24
+tabla_26 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("ACTUALIZACIÓN"))-> t26
 
-ggplot(tabla_26) +
-  aes(x = MES, y = ACTUALIZACIÓN, group=1) +
-  geom_line(fill="#D98CBC", colour="#C91682", size=1) + 
-  geom_point(aes(x = MES, y = ACTUALIZACIÓN, group=1), fill="#C91682", colour="#C91682")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr26
+t26 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 26",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`ACTUALIZACIÓN` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr26
 ```
 
 ```{r, include=T, echo=F}
-tabla_26 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr26)
+tabla_26 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr26)%>% 
+    layout(title = "Indicador 26",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 
 ```
 
-# Indicador 27
+## Indicador 27
 
-### Número de opiniones técnicas que ha emitido la Dirección de Análisis y Contexto sobre los delitos de feminicidio y desaparición de niñas, adolescentes y mujeres.
+#### Número de opiniones técnicas que ha emitido la Dirección de Análisis y Contexto sobre los delitos de feminicidio y desaparición de niñas, adolescentes y mujeres.
 
 ```{r , include=FALSE, echo=F}
 
@@ -588,25 +727,42 @@ indicador_27 %>%
             `TOTAL OPINIONES TÉCNICAS`=sum(`TOTAL OPINIONES TÉCNICAS`),
            `LÍNEA BASE`=scales::percent(sum(`NÚMERO DE CASOS ANALIZADOS`/`TOTAL OPINIONES TÉCNICAS`), 0.1)) -> tabla_27
 
-ggplot(tabla_27) +
-  aes(x = MES, y = `NÚMERO DE CASOS ANALIZADOS`, group=1) +
-  geom_line(fill="#D98CBC", colour="#C91682", size=1) + 
-  geom_point(aes(x = MES, y = `NÚMERO DE CASOS ANALIZADOS`, group=1), fill="#C91682", colour="#C91682")+
-      geom_line(aes(y=`TOTAL OPINIONES TÉCNICAS`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`TOTAL OPINIONES TÉCNICAS`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal() + facet_wrap(vars(AÑO))-> gr27
+tabla_27 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("NÚMERO DE CASOS ANALIZADOS",
+                      "TOTAL OPINIONES TÉCNICAS"))-> t27
+t27 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 27",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`NÚMERO DE CASOS ANALIZADOS` = "#C91682",
+                   `TOTAL OPINIONES TÉCNICAS` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr27
+
+
 ```
 
 ```{r, include=T, echo=F}
-tabla_27 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr27)
+tabla_27 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr27)%>% 
+    layout(title = "Indicador 27",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 28
+## Indicador 28
 
-### Porcentaje de mujeres víctimas de violación y violencia familiar que son atendidas y proceden a realizar una denuncia en los Centros de Justicia para las Mujeres, en relación al total de mujeres atendidas en los Centros de Justicia para las Mujeres
+#### Porcentaje de mujeres víctimas de violación y violencia familiar que son atendidas y proceden a realizar una denuncia en los Centros de Justicia para las Mujeres, en relación al total de mujeres atendidas en los Centros de Justicia para las Mujeres
 
 ```{r , include=FALSE, echo=F}
 
@@ -622,38 +778,54 @@ indicador_28 %>%
             `MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR`=sum(`MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR`),
            `LÍNEA BASE`=scales::percent(sum((`MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLACION`+ `MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR`)/`MUJERES ATENDIDAS EN EL CJM`), 0.1)) -> tabla_28
 
-  ggplot(tabla_28) +
-  aes(x = MES, y = `MUJERES ATENDIDAS EN EL CJM`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `MUJERES ATENDIDAS EN EL CJM`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    
-    geom_line(aes(y=`MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLACION`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLACION`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal() + facet_wrap(vars(AÑO))-> gr28
+
+tabla_28 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("MUJERES ATENDIDAS EN EL CJM",
+                      "MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLACION",
+                      "MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR"))-> t28
+
+t28 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 28",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `MUJERES ATENDIDAS EN EL CJM` = "#D98CBC",
+          `MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLACION` = "#C91682",
+          `MUJERES QUE REALIZAN UNA DENUNCIA POR EL DELITO DE VIOLENCIA FAMILIAR` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr28
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_28 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr28)
+tabla_28 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr28)%>% 
+    layout(title = "Indicador 28",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 29
-### Pendiente
-### Porcentaje de casos de violencia contra las mujeres por razones de género judicializados.
+## Indicador 29
+#### Pendiente
+#### Porcentaje de casos de violencia contra las mujeres por razones de género judicializados.
 
-# Indicador 30
+## Indicador 30
 
-### Porcentaje de sentencias por el delito de feminicidio en relación a los casos vinculados a proceso.
+#### Porcentaje de sentencias por el delito de feminicidio en relación a los casos vinculados a proceso.
 
 
-#### AÑO 2020 [36 en proceso 2020 y 11 sentencias: 31%]
-#### AÑO 2020 [29 en proceso 2020 y 06 sentencias: 21%]
+##### AÑO 2020 [36 en proceso 2020 y 11 sentencias: 31%]
+##### AÑO 2020 [29 en proceso 2020 y 06 sentencias: 21%]
 ```{r , include=FALSE, echo=F}
 
 indicador_30 %>%
@@ -670,29 +842,44 @@ indicador_30 %>%
   summarise(`TOTAL DE SENTENCIA`=sum(`AÑO DE SENTENCIA`),
            `LÍNEA BASE`=scales::percent(sum(`TOTAL DE SENTENCIA`/n()))) -> tabla_30
 
+tabla_30 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE SENTENCIA"))-> t30
 
-  ggplot(tabla_30) +
-  aes(x = MES, y = `TOTAL DE SENTENCIA`, group=1) +
-  geom_line(fill="#C91682", colour="#C91682", size=1) + 
-  geom_point(aes(x = MES, y =`TOTAL DE SENTENCIA`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) ->gr30
+t30 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 30",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`TOTAL DE SENTENCIA` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr30
 
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_30 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr30)
+tabla_30 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr30)%>% 
+    layout(title = "Indicador 30",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 31
+## Indicador 31
 
-### Porcentaje de niñas, adolescentes y mujeres denunciadas como desaparecidas que son localizadas.
+#### Porcentaje de niñas, adolescentes y mujeres denunciadas como desaparecidas que son localizadas.
 
+#### Pendiente
 ```{r , include=FALSE, echo=F}
-
 
 indicador_31 %>%
   mutate(MES=factor(MES,
@@ -700,38 +887,50 @@ indicador_31 %>%
                              "Septiembre", "Octubre", "Noviembre", "Diciembre",
                              "Enero a Junio", "Julio a Diciembre")))->indicador_31
 
-
-
 indicador_31$DESAPARECIDAS<- as.numeric(indicador_31$DESAPARECIDAS)
 indicador_31$LOCALIZADAS<- as.numeric(indicador_31$LOCALIZADAS)
 
-  
 indicador_31 %>% 
       group_by(AÑO, MES) %>% 
   summarise(DESAPARECIDAS=sum(DESAPARECIDAS),
             LOCALIZADAS=sum(LOCALIZADAS),
            `LÍNEA BASE`=scales::percent(sum(LOCALIZADAS/DESAPARECIDAS))) -> tabla_31
 
-  ggplot(tabla_31) +
-  aes(x = MES, y = LOCALIZADAS, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y =LOCALIZADAS, group=1), fill="#D98CBC", colour="#D98CBC")+
-    
-        geom_line(aes(y=DESAPARECIDAS, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=DESAPARECIDAS, group=1), colour="#C91682", fill="#C91682")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr31
+tabla_31 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("DESAPARECIDAS",
+                      "LOCALIZADAS"))-> t31
+t31 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 27",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`DESAPARECIDAS` = "#C91682",
+                   `LOCALIZADAS` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr31
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_31 %>% datatable(filter="top", options = list(pageLength = 16))
+tabla_31 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr31)%>% 
+    layout(title = "Indicador 31",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 32
+## Indicador 32
 
-### Número de denuncias de niñas, adolescentes y mujeres desaparecidas.
+#### Número de denuncias de niñas, adolescentes y mujeres desaparecidas.
 
 ```{r , include=FALSE, echo=F}
 
@@ -742,36 +941,53 @@ indicador_32 %>%
   
 indicador_32 %>% 
       group_by(AÑO, MES) %>% 
-  summarise(`TOTAL DE NÚMERO DE DENUNCIAS DE NIÑAS, ADOLESCENTES Y MUJERES DESAPARECIDAS`= sum(`0 A 2 AÑOS...4`+
-                                                `3 A 5 AÑOS...5`+
-                                                `6 A 12 AÑOS...6`+
-                                                `13 A 17 AÑOS...7`+
-                                                `18 A 25 AÑOS...8`+
-                                                `26 A 35 AÑOS...9`+
-                                                `36 A 45 AÑOS...10`+
-                                                `46 A 59 AÑOS...11`+
-                                                `60  AÑOS EN ADELANTE...12`+
-                                                `SIN DATOS...13`)) -> tabla_32
+  summarise(`TOTAL DE NÚMERO DE DENUNCIAS DE NIÑAS, ADOLESCENTES Y MUJERES DESAPARECIDAS`= sum(
+                                                `0 A 2 AÑOS`+
+                                                `3 A 5 AÑOS`+
+                                                `6 A 12 AÑOS`+
+                                                `13 A 17 AÑOS`+
+                                                `18 A 25 AÑOS`+
+                                                `26 A 35 AÑOS`+
+                                                `36 A 45 AÑOS`+
+                                                `46 A 59 AÑOS`+
+                                                `60  AÑOS EN ADELANTE`+
+                                                `SIN DATOS`)) -> tabla_32
+tabla_32 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE NÚMERO DE DENUNCIAS DE NIÑAS, ADOLESCENTES Y MUJERES DESAPARECIDAS"))-> t32
 
-  ggplot(tabla_32) +
-  aes(x = MES, y = `TOTAL DE NÚMERO DE DENUNCIAS DE NIÑAS, ADOLESCENTES Y MUJERES DESAPARECIDAS`, group=1) +
-  geom_line(fill="#C91682", colour="#C91682", size=1) + 
-  geom_point(aes(x = MES, y =`TOTAL DE NÚMERO DE DENUNCIAS DE NIÑAS, ADOLESCENTES Y MUJERES DESAPARECIDAS`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO))->gr32
+t32 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 30",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`TOTAL DE NÚMERO DE DENUNCIAS DE NIÑAS, ADOLESCENTES Y MUJERES DESAPARECIDAS` = "#C91682"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr32
+
 ```
 
 ```{r, include=T, echo=F}
-tabla_32 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr32)
+tabla_32 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr32)%>% 
+    layout(title = "Indicador 32",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 33
+## Indicador 33
 
-### Porcentaje de cédulas únicas de difusión que son remitidas al Comité Técnico de Colaboración.
-### 2021
-##### Cuadrar que no en meses como FEB, MAY y JUN hayan estado en cero cédulas.
+#### Porcentaje de cédulas únicas de difusión que son remitidas al Comité Técnico de Colaboración.
+#### 2021
+###### Cuadrar que no en meses como FEB, MAY y JUN hayan estado en cero cédulas.
 
 ```{r , include=FALSE, echo=F}
 
@@ -781,35 +997,48 @@ indicador_33 %>%
                              "Septiembre", "Octubre", "Noviembre", "Diciembre")))->indicador_33
   
 indicador_33 %>% 
-      group_by(MES) %>% 
+      group_by(AÑO,MES) %>% 
   summarise(`TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS`=sum(`TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS`),
             `CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN`=sum(`CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN`),
            `LÍNEA BASE`=scales::percent(sum((`CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN`)/`TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS`), 0.1)) -> tabla_33
   
-ggplot(tabla_33) +
-  aes(x = MES, y = `TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS`, group=1) +
-  geom_line(fill="#7E3794", colour="#7E3794", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS`, group=1), fill="#7E3794", colour="#7E3794")+
-    
-    geom_line(aes(y=`CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN`, group=1), colour="#C91682", fill="#C91682")+
-    
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal() -> gr33
+tabla_33 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS",
+                      "CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN"))-> t33
+t33 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 33",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`TOTAL DE CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS` = "#C91682",
+                   `CÉDULAS ÚNICAS DE DIFUSIÓN EMITIDAS QUE SON REMITIDAS AL COMITÉ TÉCNICO DE COLABORACIÓN` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr33
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_33 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr33)
+tabla_33 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr33)%>% 
+    layout(title = "Indicador 33",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 34
+## Indicador 34
 
-### Porcentaje de casos de búsqueda y localización realizados de forma inmediata y diferenciada en relación al total de casos.
+#### Porcentaje de casos de búsqueda y localización realizados de forma inmediata y diferenciada en relación al total de casos.
 
-#### OJO: Estos datos sí coinciden con los indicadores anteriores, pero indica que en cada más a cada caso se le aplicó el protocolo a cabalidad (sólo validar).
+##### OJO: Estos datos sí coinciden con los indicadores anteriores, pero indica que en cada más a cada caso se le aplicó el protocolo a cabalidad (sólo validar).
 
 ```{r , include=FALSE, echo=F}
 
@@ -825,35 +1054,47 @@ indicador_34 %>%
             `NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA`=sum(`NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA`),
            `LÍNEA BASE`=scales::percent(sum((`NÚMERO DE CASOS DE LOCALIZACIÓN`)/`NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA`), 0.1)) -> tabla_34
 
-
-ggplot(tabla_34) +
-  aes(x = MES, y = `NÚMERO DE CASOS DE BÚSQUEDA`, group=1) +
-  geom_line(fill="#D98CBC", colour="#D98CBC", size=1) + 
-  geom_point(aes(x = MES, y = `NÚMERO DE CASOS DE BÚSQUEDA`, group=1), fill="#D98CBC", colour="#D98CBC")+
-    
-    geom_line(aes(y=`NÚMERO DE CASOS DE LOCALIZACIÓN`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`NÚMERO DE CASOS DE LOCALIZACIÓN`, group=1), colour="#C91682", fill="#C91682")+
-    
-    geom_line(aes(y=`NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA`, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-    geom_point(aes(y=`NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA`, group=1), colour="#7E3794", fill="#7E3794")+
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr34
+tabla_34 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("NÚMERO DE CASOS DE LOCALIZACIÓN",
+                      "NÚMERO DE CASOS DE BÚSQUEDA",
+                      "NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA"))-> t34
+t34 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 34",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(
+          `NÚMERO DE CASOS DE LOCALIZACIÓN` = "#D98CBC",
+          `NÚMERO DE CASOS DE BÚSQUEDA` = "#C91682",
+          `NÚMERO DE CASOS DE APLICACIÓN A CABALIDAD DEL PROTOCOLO ALBA` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr34
 ```
 
 ```{r, include=T, echo=F}
-tabla_34 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr34)
+tabla_34 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr34)%>% 
+    layout(title = "Indicador 34",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 35
+## Indicador 35
 
-### Porcentaje de Cédulas de Difusión activas en relación al total de Cédulas de Difusión emitidas.
+#### Porcentaje de Cédulas de Difusión activas en relación al total de Cédulas de Difusión emitidas.
 
-##### Mismo caso del 33: Cuadrar que no en meses como FEB, MAY y JUN hayan estado en cero cédulas.
+###### Mismo caso del 33: Cuadrar que no en meses como FEB, MAY y JUN hayan estado en cero cédulas.
 
 ```{r , include=FALSE, echo=F}
-
 
 indicador_35 %>%
   mutate(MES=factor(MES,
@@ -865,30 +1106,43 @@ indicador_35 %>%
             `TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS`=sum(`TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS`),
            `LÍNEA BASE`=scales::percent(sum((`CÉDULAS DE DIFUSIÓN ACTIVAS`)/`TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS`), 0.1)) -> tabla_35
 
-ggplot(tabla_35) +
-  aes(x = MES, y = `CÉDULAS DE DIFUSIÓN ACTIVAS`, group=1) +
-  geom_line(fill="#7E3794", colour="#7E3794", size=1) + 
-  geom_point(aes(x = MES, y = `CÉDULAS DE DIFUSIÓN ACTIVAS`, group=1), fill="#7E3794", colour="#7E3794")+
-    
-    geom_line(aes(y=`TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS`, group=1), colour="#C91682", fill="#C91682")+
-    
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr35
+tabla_35 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("CÉDULAS DE DIFUSIÓN ACTIVAS",
+                      "TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS"))-> t35
+t35 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 35",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`CÉDULAS DE DIFUSIÓN ACTIVAS` = "#C91682",
+                   `TOTAL DE CÉDULAS DE DIFUSIÓN EMITIDAS` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr35
 
 ```
 
 ```{r, include=T, echo=F}
-tabla_35 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr35)
+tabla_35 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr35)%>% 
+    layout(title = "Indicador 35",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 36
+## Indicador 36
 
-### Porcentaje de casos de investigación de desaparición de niñas y adolescentes en los que se activa reporte Amber.
+#### Porcentaje de casos de investigación de desaparición de niñas y adolescentes en los que se activa reporte Amber.
 
-#### Coinciden los datos con el resto de los indicadores, sólo checar que indican que cada caso se activó Amber
+##### Coinciden los datos con el resto de los indicadores, sólo checar que indican que cada caso se activó Amber
 
 ```{r , include=FALSE, echo=F}
 
@@ -903,33 +1157,45 @@ indicador_36 %>%
             `TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES`=sum(`TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES`),
            `LÍNEA BASE`=scales::percent(sum((`NÚMERO DE CASOS EN LOS QUE SE ACTIVA, DE CONFORMIDAD CON LA NORMATIVIDAD Y EN EL TIEMPO ESTABLECIDO EL PROTOCOLO DE LA ALERTA AMBER`)/`TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES`), 0.1)) -> tabla_36 
 
-ggplot(tabla_36) +
-  aes(x = MES, y = `NÚMERO DE CASOS EN LOS QUE SE ACTIVA, DE CONFORMIDAD CON LA NORMATIVIDAD Y EN EL TIEMPO ESTABLECIDO EL PROTOCOLO DE LA ALERTA AMBER`, group=1) +
-  geom_line(fill="#7E3794", colour="#7E3794", size=1) + 
-  geom_point(aes(x = MES, y = `NÚMERO DE CASOS EN LOS QUE SE ACTIVA, DE CONFORMIDAD CON LA NORMATIVIDAD Y EN EL TIEMPO ESTABLECIDO EL PROTOCOLO DE LA ALERTA AMBER`, group=1), fill="#7E3794", colour="#7E3794")+
-    
-    geom_line(aes(y=`TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES`, group=1), colour="#C91682", fill="#C91682")+
-    
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal()+ facet_wrap(vars(AÑO)) -> gr36
+tabla_36 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("NÚMERO DE CASOS EN LOS QUE SE ACTIVA, DE CONFORMIDAD CON LA NORMATIVIDAD Y EN EL TIEMPO ESTABLECIDO EL PROTOCOLO DE LA ALERTA AMBER",
+                      "TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES"))-> t36
 
-
+t36 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 36",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`NÚMERO DE CASOS EN LOS QUE SE ACTIVA, DE CONFORMIDAD CON LA NORMATIVIDAD Y EN EL TIEMPO ESTABLECIDO EL PROTOCOLO DE LA ALERTA AMBER` = "#C91682",
+                   `TOTAL DE CASOS DE DESAPARICIÓN DE NIÑAS Y ADOLESCENTES` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr36
 ```
 
 ```{r, include=T, echo=F}
-tabla_36 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr36)
+tabla_36 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr36)%>% 
+    layout(title = "Indicador 36",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 37
+## Indicador 37
 
-### Porcentaje de personal capacitado en el Protocolo Alba.
+#### Porcentaje de personal capacitado en el Protocolo Alba.
 
-#### Validar lo de "Función" del personal.
+##### Validar lo de "Función" del personal.
 
-##### OJO: A excepeción de P.I. y Auxiliar jurídico, se indica que el resto está capacitado.
+###### OJO: A excepeción de P.I. y Auxiliar jurídico, se indica que el resto está capacitado.
 
 ```{r , include=FALSE, echo=F}
 
@@ -948,13 +1214,13 @@ indicador_37 %>%
 ```
 
 ```{r, include=T, echo=F}
-tabla_37 %>% datatable(filter="top", options = list(pageLength = 16))
+tabla_37 %>% datatable(filter="top", options = list(pageLength = 6))
 
 ```
 
-# Indicador 38
+## Indicador 38
 
-### Porcentaje de casos resueltos en etapa de investigación.
+#### Porcentaje de casos resueltos en etapa de investigación.
 
 ```{r , include=FALSE, echo=F}
 
@@ -969,29 +1235,43 @@ indicador_38 %>%
             `TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`=sum(`TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`),
            `LÍNEA BASE`=scales::percent(sum((`TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`)/`CASOS DE DESAPARICIÓN DENUNCIADOS`), 0.1)) -> tabla_38
 
-ggplot(tabla_38) +
-  aes(x = MES, y = `CASOS DE DESAPARICIÓN DENUNCIADOS`, group=1) +
-  geom_line(fill="#7E3794", colour="#7E3794", size=1) + 
-  geom_point(aes(x = MES, y = `CASOS DE DESAPARICIÓN DENUNCIADOS`, group=1), fill="#7E3794", colour="#7E3794")+
-    
-    geom_line(aes(y=`TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`, group=1), colour="#C91682", fill="#C91682")+
-    
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal() + facet_wrap(vars(AÑO))-> gr38
+tabla_38 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("CASOS DE DESAPARICIÓN DENUNCIADOS",
+                      "TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN"))-> t38
+
+t38 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 38",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`CASOS DE DESAPARICIÓN DENUNCIADOS` = "#C91682",
+                   `TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN` = "#7E3794"))+
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr38
 ```
 
 ```{r, include=T, echo=F}
-tabla_38 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr38)
+tabla_38 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr38)%>% 
+    layout(title = "Indicador 38",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
 
-# Indicador 39
+## Indicador 39
 
-### Porcentaje de casos de desaparición que reciben seguimiento.
+#### Porcentaje de casos de desaparición que reciben seguimiento.
 
-#### OJO: Aquí este indicador va con 100 en cada mes.
+##### OJO: Aquí este indicador va con 100 en cada mes.
 
 ```{r , include=FALSE, echo=F}
 
@@ -1006,40 +1286,47 @@ indicador_39 %>%
             `TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS`=sum(`TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS`),
            `LÍNEA BASE`=scales::percent(sum((`CASOS DE DESAPARICIÓN QUE RECIBEN SEGUIMIENTO POR PARTE DE PROTOCOLO ALBA`)/`TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS`), 0.1)) -> tabla_39
 
-# indicador_38 %>% 
-#       group_by(MES) %>% 
-#   summarise(`CASOS DE DESAPARICIÓN DENUNCIADOS`=sum(`CASOS DE DESAPARICIÓN DENUNCIADOS`),
-#             `TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`=sum(`TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`),
-#            `LÍNEA BASE`=scales::percent(sum((`TOTAL DE CASOS RESUELTOS EN ETAPA DE INVESTIGACIÓN`)/`CASOS DE DESAPARICIÓN DENUNCIADOS`), 0.1)) -> tabla_38
+tabla_39 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("CASOS DE DESAPARICIÓN QUE RECIBEN SEGUIMIENTO POR PARTE DE PROTOCOLO ALBA",
+                      "TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS"))-> t39
 
-
-ggplot(tabla_39) +
-  aes(x = MES, y = `TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS`, group=1) +
-  geom_line(fill="#7E3794", colour="#7E3794", size=1) + 
-  geom_point(aes(x = MES, y = `TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS`, group=1), fill="#7E3794", colour="#7E3794")+
-    
-    geom_line(aes(y=`CASOS DE DESAPARICIÓN QUE RECIBEN SEGUIMIENTO POR PARTE DE PROTOCOLO ALBA`, group=1), colour="#C91682", fill="#C91682", size=1)+ 
-    geom_point(aes(y=`CASOS DE DESAPARICIÓN QUE RECIBEN SEGUIMIENTO POR PARTE DE PROTOCOLO ALBA`, group=1), colour="#C91682", fill="#C91682")+
-    
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal() + facet_wrap(vars(AÑO))-> gr39
+t39 %>% 
+ ggplot() +
+  aes(x = MES, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 39",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`CASOS DE DESAPARICIÓN QUE RECIBEN SEGUIMIENTO POR PARTE DE PROTOCOLO ALBA` = "#C91682",
+                   `TOTAL DE CASOS DE DESAPARICIÓN DENUNCIADOS` = "#7E3794")) +
+  theme(legend.position = "bottom")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> gr39
 ```
 
 ```{r, include=T, echo=F}
-tabla_39 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr39)
+tabla_39 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr39)%>% 
+    layout(title = "Indicador 39",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 
 ```
 
-# Indicador 40
+## Indicador 40
 
-### Porcentaje de muertes violentas de mujeres registradas, en relación al año anterior.
+#### Porcentaje de muertes violentas de mujeres registradas, en relación al año anterior.
 
-#### Falta comparar con el año anterior, sólo estamos en las sumatorias.
-#### Corroborar que sean víctimas o carpetas y a su vez cuadrar los totales, hace ruido el total feminicidios.
+##### Falta comparar con el año anterior, sólo estamos en las sumatorias.
+##### Corroborar que sean víctimas o carpetas y a su vez cuadrar los totales, hace ruido el total feminicidios.
 
-#### Suma== 362 muertes violentas.
+##### Suma== 362 muertes violentas.
 
 ```{r , include=FALSE, echo=F}
 
@@ -1049,7 +1336,7 @@ indicador_40 %>%
                              "Septiembre","Octubre", "Noviembre", "Diciembre")))->indicador_40
   
 indicador_40 %>% 
-      group_by(AÑO, MES) %>% 
+      group_by(AÑO) %>% 
   summarise(`HOMICIDIO CULPOSO`=sum(`HOMICIDIO CULPOSO`),
             `HOMICIDIO DOLOSO`=sum(`HOMICIDIO DOLOSO`),
             `ACCIDENTE`=sum(`ACCIDENTE`),
@@ -1060,36 +1347,43 @@ indicador_40 %>%
                                               `ACCIDENTE`+ `FEMINICIDIO`+
                                               `SUICIDIO`+ `EL QUE RESULTE`)) -> tabla_40
 
+tabla_40 %>% 
+  pivot_longer(names_to = "CLASIFICACIÓN",
+               values_to = "TOTAL",
+               cols=c("HOMICIDIO CULPOSO",
+                      "HOMICIDIO DOLOSO",
+                      "ACCIDENTE",
+                      "FEMINICIDIO",
+                      "SUICIDIO",
+                      "EL QUE RESULTE"))-> t40
 
-ggplot(tabla_40) +
-  aes(x = MES, y = FEMINICIDIO, group=1) +
-  geom_line(fill="#7E3794", colour="#7E3794", size=1) + 
-  geom_point(aes(x = MES, y = FEMINICIDIO, group=1), fill="#7E3794", colour="#7E3794")+
-  
-  geom_line(aes(y=`HOMICIDIO CULPOSO`, group=1), colour="#597DFF", fill="#597DFF", size=1)+ 
-    geom_point(aes(y=`HOMICIDIO CULPOSO`, group=1), colour="#597DFF", fill="#597DFF")+
-  
-  geom_line(aes(y=`HOMICIDIO DOLOSO`, group=1), colour="#A544FF", fill="#A544FF", size=1)+ 
-    geom_point(aes(y=`HOMICIDIO DOLOSO`, group=1), colour="#A544FF", fill="#A544FF")+
-  
-  geom_line(aes(y=ACCIDENTE, group=1), colour="#B76AFF", fill="#B76AFF", size=1)+ 
-    geom_point(aes(y=ACCIDENTE, group=1), colour="#B76AFF", fill="#B76AFF")+
-  
-  # geom_line(aes(y=FEMINICIDIO, group=1), colour="#7E3794", fill="#7E3794", size=1)+ 
-  #   geom_point(aes(y=FEMINICIDIO, group=1), colour="#7E3794", fill="#7E3794")+
-  # 
-  geom_line(aes(y=SUICIDIO, group=1), colour="#DA53FF", fill="#DA53FF", size=1)+ 
-    geom_point(aes(y=SUICIDIO, group=1), colour="#DA53FF", fill="#DA53FF")+
-  
-  geom_line(aes(y=`EL QUE RESULTE`, group=1), colour="#FF3094", fill="#FF3094", size=1)+ 
-    geom_point(aes(y=`EL QUE RESULTE`, group=1), colour="#FF3094", fill="#FF3094")+
-    
-    xlab("") + ylab("")+ 
-    scale_y_continuous(labels = scales::comma) +
-  theme_minimal() -> gr40
+t40 %>% 
+ ggplot() +
+  aes(x = AÑO, y = TOTAL, colour = CLASIFICACIÓN, group=CLASIFICACIÓN) +
+  geom_line(size = 1.5) + geom_point(size = 3)+
+  labs(x="", y="", title = "Indicador 39",
+       color = "CLASIFICACIÓN") +
+  theme_minimal()+   
+  #facet_wrap(vars(AÑO))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_color_manual(
+        values = c(`HOMICIDIO CULPOSO` = "#C91682",
+                   `HOMICIDIO DOLOSO` = "#7E3794",
+                   `ACCIDENTE` = "#D98CBC",
+                   `FEMINICIDIO`= "#B58CD9",
+                   `SUICIDIO`= "#A544FF",
+                   `EL QUE RESULTE`= "#597DFF")) +
+  theme(legend.position = "bottom") -> gr40
+
+
 ```
 
 ```{r, include=T, echo=F}
-tabla_40 %>% datatable(filter="top", options = list(pageLength = 16))
-ggplotly(gr40)
+tabla_40 %>% datatable(filter="top", options = list(pageLength = 6))
+
+ggplotly(gr40)%>% 
+    layout(title = "Indicador 40",
+    legend = list(orientation = 'v', 
+                  x = 0, y = -1), 
+    xaxis = list(side = "bottom"),legend = list(side="bottom"))
 ```
