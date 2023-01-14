@@ -1,0 +1,43 @@
+@font-face { 
+   font-family: Nutmeg-Light;
+   src: url('Nutmeg-Light.ttf') format("truetype");}
+
+
+@font-face { 
+   font-family: Nutmeg-Light;
+   src: url('Nutmeg-Light.ttf') format("truetype");}
+
+
+
+   
+/* Headers */
+h1,h2,h3,h4,h5,h6{
+  font-size: 24pt;
+  font-family: Nutmeg-Light;
+}
+
+
+.navbar1 .navbar-default .navbar-brand{
+   font-family: Nutmeg-Light;
+}
+
+
+
+
+body {
+  font-family: Nutmeg-Light;
+}
+
+p{
+  font-family: Nutmeg-Light;
+}
+
+
+.value-box .value {
+    color: white;
+    size: 15;
+    font-family: Nutmeg-Light;
+
+}
+
+

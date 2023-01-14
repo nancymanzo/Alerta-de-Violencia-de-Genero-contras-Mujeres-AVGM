@@ -1,0 +1,97 @@
+@font-face { 
+   font-family: Nutmeg-Light;
+   src: url('Nutmeg-Light.ttf') format("truetype");}
+
+
+@font-face { 
+   font-family: Nutmeg-Light;
+   src: url('Nutmeg-Light.ttf') format("truetype");}
+
+
+
+   
+   /* Whole document: */
+body{
+  font-family: Nutmeg-Light;
+  font-size: 16pt;
+}
+
+/* Headers */
+h1,h2,h3,h4,h5,h6{
+  font-size: 24pt;
+  font-family: Nutmeg-Light;
+}
+
+
+.navbar1 .navbar-default .navbar-brand{
+   font-family: Nutmeg-Light;
+}
+
+.skin-blue .main-header .navbar{
+background-color: #ff0000;
+font-family: Nutmeg-Light;}
+
+/* main sidebar */
+.skin-blue .main-sidebar{
+background-color: #f4b943;
+font-family: Nutmeg-Light;}
+
+/* active selected tab in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu{
+font-family: Nutmeg-Light;}
+
+/* other links in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu{
+background-color: #00ff00;
+color: #000000;
+font-family: Nutmeg-Light;}
+
+/* body */
+.content-wrapper, .right-side{
+background-color: #ffffff;
+font-family: Nutmeg-Light;}
+
+.shiny-input-container, h5{
+font-family: Nutmeg-Light;
+}
+
+
+.navbar1 .navbar{
+  font-family: Nutmeg-Light SemiBold;
+}
+
+.navbar1 .navbar-default .navbar-brand{
+  font-family: Nutmeg-Light;
+
+}
+
+.navbar-default .navbar-nav > li > a {
+  font-family: Nutmeg-Light;
+}
+
+.navbar1 .navbar-nav li a:hover, .navbar1 .navbar-nav > .active > a {
+  font-family: Nutmeg-Light;
+  
+}
+
+
+
+
+body {
+  font-family: Nutmeg-Light;
+}
+
+p{
+  font-family: Nutmeg-Light;
+}
+
+
+.value-box .value {
+    color: white;
+    size: 12;
+    font-family: Nutmeg-Light;
+
+}
+
+
+
